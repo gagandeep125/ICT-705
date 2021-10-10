@@ -1,0 +1,122 @@
+<html>
+  
+  <head>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*"/>
+	
+    <title>Queensland Fire Stations</title>
+	<style>
+	html, body {
+        height: 100%;
+        margin: 20;
+        padding: 0;
+      }
+      #map {
+	  margin:20;
+      height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+  <div> 
+    <select id="region-dropdown" >
+	</select>
+	<button id="submit" onclick="url_1=getselectvalue(),serverRequest(url_1, processResponse)">
+	Display Stations</button>
+	</div>
+	
+	<div id="map"></div>
+
+	
+<script type="text/javascript">
+////dynamically loading regions in dropdown box      
+let dropdown = document.getElementById('region-dropdown');
+dropdown.length = 0;
+
+let defaultOption = document.createElement('option');
+defaultOption.text = 'All Regions';
+defaultOption.value= 0;
+
+dropdown.add(defaultOption);
+dropdown.selectedIndex = 0;
+
+const url = 'http://localhost:8081/getregions';
+
+const request = new XMLHttpRequest();
+request.open('GET', url, true);
+
+request.onload = function() {
+  if (request.status === 200) {
+    const data = JSON.parse(request.responseText);
+    let option;
+    for (let i = 0; i < data.length; i++) {
+      option = document.createElement('option');
+      option.text = data[i]["Region Name"];
+      option.value = data[i].RegionID;
+      dropdown.add(option);
+    }
+   } else {
+    // Reached the server, but it returned an error
+  }   
+}
+
+request.onerror = function() {
+  console.error('An error occurred fetching the JSON from ' + url);
+};
+
+request.send();
+
+//getin the regiion value to be passed in server request
+function getselectvalue()
+{
+var a=document.getElementById("region-dropdown").value;
+return 'http://localhost:8081/getstations?regionid='+a;
+}
+
+function serverRequest(url, returnProcess) {
+        var xhttp;
+        if (window.XMLHttpRequest) {
+        // code for modern browsers
+          xhttp = new XMLHttpRequest();
+        } 
+        else {
+        // code for IE6, IE5
+          xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            returnProcess(this);
+          }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+        };
+		
+      function processResponse(xhttp) {
+      const jdata = JSON.parse(xhttp.responseText);
+	  for (var i=0;i< jdata.length;i++){
+	  var marker= new google.maps.Marker({
+	  position: {lat: jdata[i].lat, lng: jdatat[i].lng},
+	  title: jdata[i].placeName,
+	  map:map
+	  });
+	  }
+	  map.setCenter(marker.getPosition());
+	  };
+	  
+		var map;
+		function initMap() {
+		  map = new google.maps.Map(document.getElementById('map'), {
+			center: {lat: -27.470125, lng: 	153.021072},
+			zoom: 12
+		  });
+		}
+  
+	  
+		 
+</script>
+	
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCO3hE4bE7WV7mGuXL4kn9caoWI44tD8Ic&callback=initMap"
+        async defer></script>
+	</body>
+  
